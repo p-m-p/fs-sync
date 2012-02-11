@@ -29,6 +29,7 @@ window.fileSync = (function (w) {
   };
 
 
+  // get the latest list of files from the server
   api.refreshFiles = function () {
 
     var xhr = new XMLHttpRequest;
@@ -104,7 +105,15 @@ window.fileSync = (function (w) {
       }
 
       else if (t.className.indexOf('open') !== -1) {
-        api.open(name);
+
+        if (t.className.indexOf('synced') === -1) {
+          api.pull(t.href, name, true);
+        }
+
+        else {
+          api.open(name);
+        }
+
       }
 
       ev.preventDefault();
@@ -115,7 +124,7 @@ window.fileSync = (function (w) {
 
 
   // pull file down into local
-  api.pull = function (url, name) {
+  api.pull = function (url, name, open) {
 
     var xhr = new XMLHttpRequest;
 
@@ -132,7 +141,13 @@ window.fileSync = (function (w) {
           var bb = new w.WebKitBlobBuilder;
 
           writer.onwriteend = function () {
-            api.flagSynced(fe)
+            
+            api.flagSynced(fe);
+
+            if (open) {
+              api.open(name);
+            }
+
           }
           writer.onerror = api.err;
 
@@ -152,11 +167,19 @@ window.fileSync = (function (w) {
 
   api.open = function (name) {
 
-    root.getFile(name, {}, function (fe) {
+    if (typeof name === 'string') {
 
-      w.location = fe.toURL();
+      root.getFile(name, {}, function (fe) {
 
-    }, api.err);
+        w.location = fe.toURL();
+
+      }, api.err);
+
+    }
+
+    else {
+      w.location = name.toURL();
+    }
 
   };
 

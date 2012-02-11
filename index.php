@@ -6,6 +6,12 @@
   </head>
   <body>
 
+    <div id="no-support">
+      Your browser doesn't support this demo, you'll need to
+      grab the latest version of <a href="http://www.google.co.uk/chrome">
+      Google Chrome</a> to be sure it will work.
+    </div>
+
     <ol id="dir-tree">
 
       <?php include 'file-list.php'; ?>
@@ -16,17 +22,25 @@
   <script src="js/sync.js"></script>
   <script>
 
-    window.requestFileSystem || (
-      window.requestFileSystem = window.webkitRequestFileSystem
-    );
-    window.webkitStorageInfo.requestQuota(PERSISTENT, 5*1024*1024, function(gb) {
-      window.requestFileSystem(
-          window.PERSISTENT
-        , gb
-        , fileSync.init
-        , fileSync.err
-      );
-    }, fileSync.err);
+    (function (w) {
+
+      if (typeof w.webkitRequestFileSystem === 'undefined') {
+
+        document.getElemntById('no-support').style.display = 'block';
+        return;
+        
+      }
+
+      w.webkitStorageInfo.requestQuota(w.PERSISTENT, 5*1024*1024, function(gb) {
+        w.webkitRequestFileSystem(
+            w.PERSISTENT
+          , gb
+          , fileSync.init
+          , fileSync.err
+        );
+      }, fileSync.err);
+
+    })(window);
 
   </script>
 </html>
